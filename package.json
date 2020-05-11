@@ -21,6 +21,7 @@
 		"lib/**/*"
 	],
 	"dependencies": {
+		"maze-algorithms": "^0.1.0",
 		"tessellatron": "^0.2.0"
 	},
 	"devDependencies": {
