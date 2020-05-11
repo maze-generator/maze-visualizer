@@ -1,0 +1,36 @@
+{
+	"name": "maze-visualizer",
+	"version": "0.0.1",
+	"description": "Maze Visualizer tools.",
+	"keywords": [
+		"maze",
+		"visualizer"
+	],
+	"license": "MIT",
+	"author": "noltron000",
+	"homepage": "https://github.com/maze-generator/maze-visualizer#readme",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/maze-generator/maze-visualizer.git"
+	},
+	"bugs": {
+		"url": "https://github.com/maze-generator/maze-visualizer/issues"
+	},
+	"main": "lib/index.js",
+	"files": [
+		"lib/**/*"
+	],
+	"dependencies": {
+		"maze-algorithms": "^0.1.0",
+		"tessellatron": "^0.2.0"
+	},
+	"devDependencies": {
+		"ts-node": "^8.10.1",
+		"typescript": "^3.8.3"
+	},
+	"scripts": {
+		"test": "echo \"Error: no test specified\" && exit 1",
+		"start": "ts-node src/index.ts",
+		"build": "tsc"
+	}
+}
