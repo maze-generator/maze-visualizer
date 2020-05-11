@@ -1,3 +1,28 @@
+import Graph, {Cell} from 'tessellatron'
+
+// a pipe-maze is much more simple to make.
+// a player must follow lines to complete the maze.
+// while less traditional, it is very easy to make.
+// each vertex determinse a unicode character.
+export const createPipeMaze = (
+	graph: any
+) => {
+	// initialize result string with linebreak.
+	let graphic: string = '\n'
+
+	// loop through maze.
+	for (const [id, cell] of graph.data.entries()) {
+		graphic += getGlyph(cell)
+
+		// add line break if end of line is reached
+		if (graph.findCoordinates(id)[0] === graph.dimensions[0]-1) {
+			graphic += '\n'
+		}
+	}
+
+	return graphic
+}
+
 const getGlyph = (
 	cell: Cell,
 	type: string = 'pipe',
