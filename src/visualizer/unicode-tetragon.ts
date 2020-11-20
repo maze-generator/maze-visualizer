@@ -28,7 +28,7 @@ export const createPipeMaze = (
 // a player must follow the space between lines to finish.
 // however, this algorithm is also more complex.
 // it must look at 4 nodes to determine 1 unicode glyph.
-export const edgeMaze = (graph: any) => {
+export const createEdgeMaze = (graph: any) => {
 
 	// store result item
 	let result = ''
