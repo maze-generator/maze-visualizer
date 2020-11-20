@@ -1,3 +1,9 @@
-import {createPipeMaze} from './visualizer/unicode-tetragon'
+import {
+	createPipeMaze,
+	createEdgeMaze,
+} from './visualizer/unicode-tetragon'
 
-export {createPipeMaze}
+export {
+	createPipeMaze,
+	createEdgeMaze,
+}

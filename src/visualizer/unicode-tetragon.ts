@@ -12,7 +12,8 @@ export const createPipeMaze = (
 
 	// loop through maze.
 	for (const [id, cell] of graph.data.entries()) {
-		graphic += getGlyph(cell)
+		const passages = cell.passages
+		graphic += getGlyph(passages)
 
 		// add line break if end of line is reached
 		if (graph.findCoordinates(id)[0] === graph.dimensions[0]-1) {
@@ -23,217 +24,234 @@ export const createPipeMaze = (
 	return graphic
 }
 
-/*
-	def edge_maze(self):
-		'''
-		an edge-maze is a traditional-looking maze.
-		a player must follow the space between lines to finish.
-		however, this algorithm is also more complex.
-		it must look at 4 nodes to determine 1 unicode glyph.
-		'''
-		# HACK reassigning self for convenience.
-		self = self.maze_object
+// an edge-maze is a traditional-looking maze.
+// a player must follow the space between lines to finish.
+// however, this algorithm is also more complex.
+// it must look at 4 nodes to determine 1 unicode glyph.
+export const edgeMaze = (graph: any) => {
 
-		# store result item
-		result = ''
+	// store result item
+	let result = ''
+	// the padding helps analyze corners and boundaries.
+	const paddedLength = graph.length + 2
+	const paddedHeight = graph.height + 2
+	const paddedMaze = new Array(paddedLength * paddedHeight).fill(null)
 
-		# the padding helps analyze corners and boundaries.
-		padded_length = self.length + 2
-		padded_height = self.height + 2
-		padded_maze = [None] * padded_length * padded_height
+	// graphics are ultimately what we are aiming to find.
+	const graphicLength = graph.length + 1
+	const graphicHeight = graph.height + 1
+	const graphicMaze = new Array(graphicLength * graphicHeight).fill(null)
 
-		# graphics are ultimately what we are aiming to find.
-		graphic_length = self.length + 1
-		graphic_height = self.height + 1
-		graphic_maze = [None] * graphic_length * graphic_height
+	// this thing preps for calculations with graphics.
+	for (let [locationStr, reference] of Object.entries(paddedMaze)) {
+		const location = parseInt(locationStr)
+		// determine row and column
+		const row = Math.floor(location / paddedLength)
+		const column = location % (paddedLength)
 
-		# this thing preps for calculations with graphics.
-		for location, reference in enumerate(padded_maze):
-			# determine row and column
-			row = location // (padded_length)
-			column = location % (padded_length)
+		// checks if the item is padding for the boundary.
+		if (
+			   row !== 0
+			&& column !== 0
+			&& row !== paddedHeight - 1
+			&& column !== paddedLength - 1
+		) {
+			reference = location - paddedLength + 1 - row * 2
+			paddedMaze[location] = reference
+		}
+	}
 
-			# checks if the item is padding for the boundary.
-			if (row == 0
-				or column == 0
-				or row == padded_height - 1
-					or column == padded_length - 1):
-				pass
-			else:
-				reference = location - padded_length + 1 - row * 2
-				padded_maze[location] = reference
+	// this thing calculates the graphics.
+	for (const [locationStr, reference] of Object.entries(graphicMaze)) {
+		let location = parseInt(locationStr)
+		// determine row and column
+		const row = location // (graphicLength)
+		const column = location % (graphicLength)
+		location = location + row
 
-		# this thing calculates the graphics.
-		for location, reference in enumerate(graphic_maze):
-			# determine row and column
-			row = location // (graphic_length)
-			column = location % (graphic_length)
-			location = location + row
+		// determines locations of items in the paddedMaze.
+		const nwLoc = paddedMaze[location]
+		const neLoc = paddedMaze[location + 1]
+		const swLoc = paddedMaze[location + paddedLength]
+		const seLoc = paddedMaze[location + paddedLength + 1]
 
-			# determines locations of items in the padded_maze.
-			nw_loc = padded_maze[location]
-			ne_loc = padded_maze[location + 1]
-			sw_loc = padded_maze[location + padded_length]
-			se_loc = padded_maze[location + padded_length + 1]
+		// initialize hallway passageways.
+		// if there is a passway, then its true, else false.
+		// `null` indicates an undeterminate value.
+		let nHall = null
+		let sHall = null
+		let eHall = null
+		let wHall = null
 
-			# initialize hallway passageways.
-			# if there is a passway, then its true, else false.
-			# none indicates an undeterminate value.
-			n_hall = None
-			s_hall = None
-			e_hall = None
-			w_hall = None
+		/* this section is looking at edge pieces.
+		there is only empty space beyond an edge.
+		these ternary operators determines this. */
+		// north boundary
+		if (
+			   nwLoc !== null
+			&& neLoc !== null
+		) {
+			nHall = true
+		}
+		// south boundary
+		if (
+			   swLoc !== null
+			&& seLoc !== null
+		) {
+			sHall = true
+		}
+		// east boundary
+		if (
+			   neLoc !== null
+			&& seLoc !== null
+		) {
+			eHall = true
+		}
+		// west boundary
+		if (
+			   nwLoc !== null
+			&& swLoc !== null
+		) {
+			wHall = true
+		}
 
-			# this section is looking at edge pieces.
-			# there is only empty space beyond an edge.
-			# these ternary operators determines this.
-			# north boundary
-			if (nw_loc is None
-					and ne_loc is None):
-				n_hall = True
-			# south boundary
-			if (sw_loc is None
-					and se_loc is None):
-				s_hall = True
-			# east boundary
-			if (ne_loc is None
-					and se_loc is None):
-				e_hall = True
-			# west boundary
-			if (nw_loc is None
-					and sw_loc is None):
-				w_hall = True
+		/*
+		verify if there is a path in any direction.
+		remember, this glyph represents a wall, not a space.
+		this is checking each path adjacent to the wall.
+		*/
+		// north path
+		if (neLoc !== null && nwLoc !== null) {
+			const east = graph.maze[neLoc]
+			const west = graph.maze[nwLoc]
+			if (
+				   east.neighbors['west'] === west
+				&& west.neighbors['east'] === east
+			) {
+				nHall = true
+			}
+		}
+		// south path
+		if (seLoc !== null && swLoc !== null) {
+			const east = graph.maze[seLoc]
+			const west = graph.maze[swLoc]
+			if (
+				   east.neighbors['west'] === west
+				&& west.neighbors['east'] === east
+			) {
+				sHall = true
+			}
+		}
+		// east path
+		if (neLoc !== null && seLoc !== null) {
+			const north = graph.maze[neLoc]
+			const south = graph.maze[seLoc]
+			if (
+				   north.neighbors['south'] === south
+				&& south.neighbors['north'] === north
+			) {
+				eHall = true
+			}
+		}
+		// west path
+		if (nwLoc !== null && swLoc !== null) {
+			const north = graph.maze[nwLoc]
+			const south = graph.maze[swLoc]
+			if (
+				   north.neighbors['south'] === south
+				&& south.neighbors['north'] === north
+			) {
+				wHall = true
+			}
+		}
 
-			# verify if there is a path in any direction.
-			# remember, this glyph represents a wall, not a space.
-			# this is checking each path adjacent to the wall.
-			# north path
-			if ne_loc is not None and nw_loc is not None:
-				east = self.maze[ne_loc]
-				west = self.maze[nw_loc]
-				if (east.neighbors['west'] == west
-						and west.neighbors['east'] == east):
-					n_hall = True
-			# south path
-			if se_loc is not None and sw_loc is not None:
-				east = self.maze[se_loc]
-				west = self.maze[sw_loc]
-				if (east.neighbors['west'] == west
-						and west.neighbors['east'] == east):
-					s_hall = True
-			# east path
-			if ne_loc is not None and se_loc is not None:
-				north = self.maze[ne_loc]
-				south = self.maze[se_loc]
-				if (north.neighbors['south'] == south
-						and south.neighbors['north'] == north):
-					e_hall = True
-			# west path
-			if nw_loc is not None and sw_loc is not None:
-				north = self.maze[nw_loc]
-				south = self.maze[sw_loc]
-				if (north.neighbors['south'] == south
-						and south.neighbors['north'] == north):
-					w_hall = True
+		// add a line break if its an end-of-line.
+		if (location % paddedLength === 0 && location !== 0) {
+			result += '\n'
+		}
+		// construct passages object
+		const passages = {
+			'north': !nHall,
+			'south': !sHall,
+			'east': !eHall,
+			'west': !wHall,
+		}
 
-			# add a line break if its an end-of-line.
-			if location % padded_length == 0 and location != 0:
-				result += '\n'
-			# get unicode glyph symbol box-drawing element.
-			result += getGlyph(n_hall, s_hall, e_hall, w_hall, 'edge')
-		# return maze drawing.
-		return result
-*/
+		// get unicode glyph symbol box-drawing element.
+		result += getGlyph(passages, 'edge')
+	}
+	// return maze drawing.
+	return result
+}
 
 const getGlyph = (
-	cell: Cell,
+	passages: Record<string, boolean>,
 	type: string = 'pipe',
 ): string => {
 
 	// this function returns a maze drawing character.
-	let pipe = ''
-	let edge = ''
+	let glyph = ''
 
 	// deconstruct cell.
-	const {north, south, east, west} = cell.passages
+	const {north, south, east, west} = passages
 
 	// four passages
 	if (north && south && east && west) {
-		edge = '  '
-		pipe = '┼─'
+		glyph = '┼─'
 	}
 
 	// three passages
 	else if (south && east && west && !(north)) {
-		edge = '╵ '
-		pipe = '┬─'
+		glyph = '┬─'
 	}
 	else if (north && east && west && !(south)) {
-		edge = '╷ '
-		pipe = '┴─'
+		glyph = '┴─'
 	}
 	else if (north && south && west && !(east)) {
-		edge = '╶─'
-		pipe = '┤ '
+		glyph = '┤ '
 	}
 	else if (north && south && east && !(west)) {
-		edge = '╴ '
-		pipe = '├─'
+		glyph = '├─'
 	}
 
 	// two passages
 	else if (north && south && !(east || west)) {
-		edge = '──'
-		pipe = '│ '
+		glyph = '│ '
 	}
 	else if (north && east && !(south || west)) {
-		edge = '┐ '
-		pipe = '└─'
+		glyph = '└─'
 	}
 	else if (north && west && !(south || east)) {
-		edge = '┌─'
-		pipe = '┘ '
+		glyph = '┘ '
 	}
 	else if (south && east && !(north || west)) {
-		edge = '┘ '
-		pipe = '┌─'
+		glyph = '┌─'
 	}
 	else if (south && west && !(north || east)) {
-		edge = '└─'
-		pipe = '┐ '
+		glyph = '┐ '
 	}
 	else if (east && west && !(north || south)) {
-		edge = '│ '
-		pipe = '──'
+		glyph = '──'
 	}
 
 	// one passage
 	else if (north && !(south || east || west)) {
-		edge = '┬─'
-		pipe = '╵ '
+		glyph = '╵ '
 	}
 	else if (south && !(north || east || west)) {
-		edge = '┴─'
-		pipe = '╷ '
+		glyph = '╷ '
 	}
 	else if (east && !(north || south || west)) {
-		edge = '┤ '
-		pipe = '╶─'
+		glyph = '╶─'
 	}
 	else if (west && !(north || south || east)) {
-		edge = '├─'
-		pipe = '╴ '
+		glyph = '╴ '
 	}
 
 	// zero passages
 	else if (!(north || south || east || west)) {
-		edge = '┼─'
-		pipe = '  '
+		glyph = '  '
 	}
 
-	if (type === 'edge') {
-		return edge
-	} else {
-		return pipe
-	}
+	return glyph
 }
