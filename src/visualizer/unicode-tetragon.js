@@ -2,7 +2,7 @@
 // a player must follow lines to complete the maze.
 // while less traditional, it is very easy to make.
 // each vertex determinse a unicode character.
-export const createPipeMaze = (graph) => {
+export const createPipeGraphic = (graph) => {
 	// initialize result string with linebreak.
 	let graphic = '\n'
 
@@ -24,18 +24,19 @@ export const createPipeMaze = (graph) => {
 // a player must follow the space between lines to finish.
 // however, this algorithm is also more complex.
 // it must look at 4 nodes to determine 1 unicode glyph.
-export const createEdgeMaze = (graph) => {
-
+export const createEdgeGraphic = (graph) => {
 	// store result item
 	let result = ''
+
 	// the padding helps analyze corners and boundaries.
-	const paddedLength = graph.length + 2
-	const paddedHeight = graph.height + 2
+	const [length, height] = graph.dimensions
+	const paddedLength = length + 2
+	const paddedHeight = height + 2
 	const paddedMaze = new Array(paddedLength * paddedHeight).fill(null)
 
 	// graphics are ultimately what we are aiming to find.
-	const graphicLength = graph.length + 1
-	const graphicHeight = graph.height + 1
+	const graphicLength = length + 1
+	const graphicHeight = height + 1
 	const graphicMaze = new Array(graphicLength * graphicHeight).fill(null)
 
 	// this thing preps for calculations with graphics.
@@ -46,12 +47,12 @@ export const createEdgeMaze = (graph) => {
 		const column = location % (paddedLength)
 
 		// checks if the item is padding for the boundary.
-		if (
-			   row !== 0
+		if ( row !== 0
 			&& column !== 0
 			&& row !== paddedHeight - 1
 			&& column !== paddedLength - 1
 		) {
+			// This location has data; its not just padding.
 			reference = location - paddedLength + 1 - row * 2
 			paddedMaze[location] = reference
 		}
@@ -83,29 +84,25 @@ export const createEdgeMaze = (graph) => {
 		there is only empty space beyond an edge.
 		these ternary operators determines this. */
 		// north boundary
-		if (
-			   nwLoc !== null
+		if ( nwLoc !== null
 			&& neLoc !== null
 		) {
 			nHall = true
 		}
 		// south boundary
-		if (
-			   swLoc !== null
+		if ( swLoc !== null
 			&& seLoc !== null
 		) {
 			sHall = true
 		}
 		// east boundary
-		if (
-			   neLoc !== null
+		if ( neLoc !== null
 			&& seLoc !== null
 		) {
 			eHall = true
 		}
 		// west boundary
-		if (
-			   nwLoc !== null
+		if ( nwLoc !== null
 			&& swLoc !== null
 		) {
 			wHall = true
@@ -117,44 +114,56 @@ export const createEdgeMaze = (graph) => {
 		this is checking each path adjacent to the wall.
 		*/
 		// north path
-		if (neLoc !== null && nwLoc !== null) {
-			const east = graph.maze[neLoc]
-			const west = graph.maze[nwLoc]
-			if (
-				   east.neighbors['west'] === west
+		if ( neLoc !== null
+			&& neLoc !== undefined
+			&& nwLoc !== null
+			&& nwLoc !== undefined
+		) {
+			const east = graph.data[neLoc]
+			const west = graph.data[nwLoc]
+			if ( east.neighbors['west'] === west
 				&& west.neighbors['east'] === east
 			) {
 				nHall = true
 			}
 		}
 		// south path
-		if (seLoc !== null && swLoc !== null) {
-			const east = graph.maze[seLoc]
-			const west = graph.maze[swLoc]
-			if (
-				   east.neighbors['west'] === west
+		if ( seLoc !== null
+			&& seLoc !== undefined
+			&& swLoc !== null
+			&& swLoc !== undefined
+		) {
+			const east = graph.data[seLoc]
+			const west = graph.data[swLoc]
+			if ( east.neighbors['west'] === west
 				&& west.neighbors['east'] === east
 			) {
 				sHall = true
 			}
 		}
 		// east path
-		if (neLoc !== null && seLoc !== null) {
-			const north = graph.maze[neLoc]
-			const south = graph.maze[seLoc]
-			if (
-				   north.neighbors['south'] === south
+		if ( neLoc !== null
+			&& neLoc !== undefined
+			&& seLoc !== null
+			&& seLoc !== undefined
+		) {
+			const north = graph.data[neLoc]
+			const south = graph.data[seLoc]
+			if ( north.neighbors['south'] === south
 				&& south.neighbors['north'] === north
 			) {
 				eHall = true
 			}
 		}
 		// west path
-		if (nwLoc !== null && swLoc !== null) {
-			const north = graph.maze[nwLoc]
-			const south = graph.maze[swLoc]
-			if (
-				   north.neighbors['south'] === south
+		if ( nwLoc !== null
+			&& nwLoc !== undefined
+			&& swLoc !== null
+			&& swLoc !== undefined
+		) {
+			const north = graph.data[nwLoc]
+			const south = graph.data[swLoc]
+			if ( north.neighbors['south'] === south
 				&& south.neighbors['north'] === north
 			) {
 				wHall = true

@@ -1,11 +1,11 @@
-import {
-	createPipeMaze,
-	createEdgeMaze,
-} from './visualizer/unicode-tetragon.js'
-
 import Maze from 'maze-algorithms'
 
+import {
+	createPipeGraphic,
+	createEdgeGraphic,
+} from './visualizer/unicode-tetragon.js'
+
 export {
-	createPipeMaze,
-	createEdgeMaze,
+	createPipeGraphic,
+	createEdgeGraphic,
 }
