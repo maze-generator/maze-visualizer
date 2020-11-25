@@ -1,14 +1,10 @@
-import Graph, {Cell} from 'tessellatron'
-
 // a pipe-maze is much more simple to make.
 // a player must follow lines to complete the maze.
 // while less traditional, it is very easy to make.
 // each vertex determinse a unicode character.
-export const createPipeMaze = (
-	graph: any
-) => {
+export const createPipeMaze = (graph) => {
 	// initialize result string with linebreak.
-	let graphic: string = '\n'
+	let graphic = '\n'
 
 	// loop through maze.
 	for (const [id, cell] of graph.data.entries()) {
@@ -28,7 +24,7 @@ export const createPipeMaze = (
 // a player must follow the space between lines to finish.
 // however, this algorithm is also more complex.
 // it must look at 4 nodes to determine 1 unicode glyph.
-export const createEdgeMaze = (graph: any) => {
+export const createEdgeMaze = (graph) => {
 
 	// store result item
 	let result = ''
@@ -185,9 +181,9 @@ export const createEdgeMaze = (graph: any) => {
 }
 
 const getGlyph = (
-	passages: Record<string, boolean>,
-	type: string = 'pipe',
-): string => {
+	passages,
+	type = 'pipe',
+) => {
 
 	// this function returns a maze drawing character.
 	let glyph = ''
