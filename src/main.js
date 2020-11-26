@@ -1,11 +1,11 @@
 import Maze from 'maze-algorithms'
 
 import {
-	createPipeGraphic,
-	createEdgeGraphic,
+	createPipedTextGraphic,
+	createEdgedTextGraphic,
 } from './visualizer/unicode-tetragon.js'
 
 export {
-	createPipeGraphic,
-	createEdgeGraphic,
+	createPipedTextGraphic,
+	createEdgedTextGraphic,
 }

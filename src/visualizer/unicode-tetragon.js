@@ -29,60 +29,124 @@ export const createEdgedTextGraphic = (graph) => {
 	return graphic
 }
 
-// an edge-maze is a traditional-looking maze.
-// a player must follow the space between lines to finish.
-// however, this algorithm is also more complex.
-// it must look at 4 nodes to determine 1 unicode glyph.
-export const createEdgeGraphic = (graph) => {
-	// store result item
-	let result = ''
+/* PIPED TEXT GRAPHIC FUNCTION */
+// A pipe maze is a traditional-looking maze.
+// In order to complete this style of maze,
+// 	players must travel the empty space between walls.
+//
+// The algorithm to make this with unicode is complex.
+// We must look at 4 nodes to determine a single wall glyph!
+//
+// You see, an intersection in an edge-maze looks like this:
+//   ╷
+// ──┼──
+//   ╵
+// ^^^^^ it sort of looks like a plus.
+// Maybe a representation of an intersection on a road map.
+// This is way easier to code out.
+//
+// But with a pipe-maze, it uses empty spaces, like this:
+//   ╷ ╷
+// ──┘ └──
+// ──┐ ┌──
+//   ╵ ╵
+// ^^^^^^^ it has empty spaces!
+// It looks like the birds-eye view of an intersection.
+// Figuring out the symbol for the corners is difficult.
 
+export const createPipedTextGraphic = (graph) => {
+	// Our return value is going to be a multi-line string.
+	// Here we'll initialize the graphic with a linebreak.
+	let graphic = '\n'
+
+	// == NOTE ==
+	// For this problem, we'll analyze four nodes at a time.
+	// To determine the shape of a wall, we'll have to know
+	// 	whether the northeast, northwest, southeast,
+	// 	and southwest nodes are connected -- or not.
+	//
+	// The first edge case you will run into are cells with
+	// 	void neighbors, like nodes at corners have.
+	// They are neighboring nothing; the edge of the map!
+	//
+	// We have to represent those void areas to still come up
+	// 	with walls that go all the way around the graphic.
+
+	// We'll first determine the "padding" for the edges.
 	// the padding helps analyze corners and boundaries.
+	// Remember; the graph is 2D (length, height).
 	const [length, height] = graph.dimensions
 	const paddedLength = length + 2
 	const paddedHeight = height + 2
 	const paddedMaze = new Array(paddedLength * paddedHeight).fill(null)
 
-	// graphics are ultimately what we are aiming to find.
+	// The graphics are ultimately what we are aiming to find.
+	// This following variables stores info about graphics.
+	//
+	// Notice there is a "+1" length for this array, NOT "+2".
+	// It's because the walls are BETWEEN cells.
+	// That's including void cells as mentioned earlier.
 	const graphicLength = length + 1
 	const graphicHeight = height + 1
-	const graphicMaze = new Array(graphicLength * graphicHeight).fill(null)
 
-	// this thing preps for calculations with graphics.
+	// This thing preps for calculations with graphics.
 	for (let [locationStr, reference] of Object.entries(paddedMaze)) {
 		const location = parseInt(locationStr)
-		// determine row and column
+
+		// Determine cell's row and column.
+		// Remember: if length of a row is 10,
+		// 	then columns 0 and 11 are void.
 		const row = Math.floor(location / paddedLength)
 		const column = location % (paddedLength)
 
-		// checks if the item is padding for the boundary.
+		// Check if the node is just padding for the boundaries.
 		if ( row !== 0
 			&& column !== 0
 			&& row !== paddedHeight - 1
 			&& column !== paddedLength - 1
 		) {
-			// This location has data; its not just padding.
+			// This location has data; its not just padding!
+			// Determine the "real" cell reference ID.
 			reference = location - paddedLength + 1 - row * 2
+
+			// Set the reference from null to this ID.
 			paddedMaze[location] = reference
 		}
 	}
 
-	// this thing calculates the graphics.
-	for (const [locationStr, reference] of Object.entries(graphicMaze)) {
-		let location = parseInt(locationStr)
-		// determine row and column
-		const row = location // (graphicLength)
-		const column = location % (graphicLength)
-		location = location + row
 
-		// determines locations of items in the paddedMaze.
-		const nwLoc = paddedMaze[location]
-		const neLoc = paddedMaze[location + 1]
-		const swLoc = paddedMaze[location + paddedLength]
-		const seLoc = paddedMaze[location + paddedLength + 1]
+	// This thing calculates the graphics.
+	// We'll iterate every length item, plus length for nulls.
+	for (
+		let location = 0; // initializer
+		location < graphicLength * graphicHeight + length; // while clause
+		location++ // iterator
+	) {
+		// Determine graphic symbol's row and column.
+		// There are no void graphic locations.
+		const row = Math.floor(location / graphicLength)
+		const column = location % (graphicLength + 1)
 
-		// initialize hallway passageways.
-		// if there is a passway, then its true, else false.
+		// Determine nearby IDs of nodes in the paddedMaze.
+		// These are not ACTUAL cells. They are "padded".
+		// This means, it includes edge-nodes or void cells.
+		// Non-void cells reference an actual graph cell!
+		const nwCellID = paddedMaze[location]
+		const neCellID = paddedMaze[location + 1]
+		const swCellID = paddedMaze[location + paddedLength]
+		const seCellID = paddedMaze[location + paddedLength + 1]
+
+		// Ignore void situations (between two lines)
+		if ( nwCellID === null
+			&& neCellID === null
+			&& swCellID === null
+			&& seCellID === null
+		) {
+			continue
+		}
+
+		// Initialize hallway passageways as booleans.
+		// If there is a passway, then its true, else false.
 		// `null` indicates an undeterminate value.
 		let nHall = null
 		let sHall = null
@@ -93,26 +157,26 @@ export const createEdgeGraphic = (graph) => {
 		there is only empty space beyond an edge.
 		these ternary operators determines this. */
 		// north boundary
-		if ( nwLoc !== null
-			&& neLoc !== null
+		if ( nwCellID === null
+			&& neCellID === null
 		) {
 			nHall = true
 		}
 		// south boundary
-		if ( swLoc !== null
-			&& seLoc !== null
+		if ( swCellID === null
+			&& seCellID === null
 		) {
 			sHall = true
 		}
 		// east boundary
-		if ( neLoc !== null
-			&& seLoc !== null
+		if ( neCellID === null
+			&& seCellID === null
 		) {
 			eHall = true
 		}
 		// west boundary
-		if ( nwLoc !== null
-			&& swLoc !== null
+		if ( nwCellID === null
+			&& swCellID === null
 		) {
 			wHall = true
 		}
@@ -122,67 +186,72 @@ export const createEdgeGraphic = (graph) => {
 		remember, this glyph represents a wall, not a space.
 		this is checking each path adjacent to the wall.
 		*/
+
 		// north path
-		if ( neLoc !== null
-			&& neLoc !== undefined
-			&& nwLoc !== null
-			&& nwLoc !== undefined
+		if ( nwCellID !== null
+			&& neCellID !== null
 		) {
-			const east = graph.data[neLoc]
-			const west = graph.data[nwLoc]
-			if ( east.neighbors['west'] === west
-				&& west.neighbors['east'] === east
+			const nwCell = graph.data[nwCellID]
+			const neCell = graph.data[neCellID]
+			if ( nwCell.neighbors['east'] === neCell.id
+				&& neCell.neighbors['west'] === nwCell.id
+				&& nwCell.passages['east']
+				&& neCell.passages['west']
 			) {
 				nHall = true
 			}
 		}
+
 		// south path
-		if ( seLoc !== null
-			&& seLoc !== undefined
-			&& swLoc !== null
-			&& swLoc !== undefined
+		if ( swCellID !== null
+			&& seCellID !== null
 		) {
-			const east = graph.data[seLoc]
-			const west = graph.data[swLoc]
-			if ( east.neighbors['west'] === west
-				&& west.neighbors['east'] === east
+			const swCell = graph.data[swCellID]
+			const seCell = graph.data[seCellID]
+			if ( swCell.neighbors['east'] === seCell.id
+				&& seCell.neighbors['west'] === swCell.id
+				&& swCell.passages['east']
+				&& seCell.passages['west']
 			) {
 				sHall = true
 			}
 		}
-		// east path
-		if ( neLoc !== null
-			&& neLoc !== undefined
-			&& seLoc !== null
-			&& seLoc !== undefined
-		) {
-			const north = graph.data[neLoc]
-			const south = graph.data[seLoc]
-			if ( north.neighbors['south'] === south
-				&& south.neighbors['north'] === north
-			) {
-				eHall = true
-			}
-		}
+
 		// west path
-		if ( nwLoc !== null
-			&& nwLoc !== undefined
-			&& swLoc !== null
-			&& swLoc !== undefined
+		if ( nwCellID !== null
+			&& swCellID !== null
 		) {
-			const north = graph.data[nwLoc]
-			const south = graph.data[swLoc]
-			if ( north.neighbors['south'] === south
-				&& south.neighbors['north'] === north
+			const nwCell = graph.data[nwCellID]
+			const swCell = graph.data[swCellID]
+			if ( nwCell.neighbors['south'] === swCell.id
+				&& swCell.neighbors['north'] === nwCell.id
+				&& nwCell.passages['south']
+				&& swCell.passages['north']
 			) {
 				wHall = true
 			}
 		}
 
-		// add a line break if its an end-of-line.
-		if (location % paddedLength === 0 && location !== 0) {
-			result += '\n'
+		// east path
+		if ( neCellID !== null
+			&& seCellID !== null
+		) {
+			const neCell = graph.data[neCellID]
+			const seCell = graph.data[seCellID]
+			if ( neCell.neighbors['south'] === seCell.id
+				&& seCell.neighbors['north'] === neCell.id
+				&& neCell.passages['south']
+				&& seCell.passages['north']
+			) {
+				eHall = true
+			}
 		}
+
+		// add a line break if its an end-of-line.
+		if (location % paddedLength === 0) {
+			graphic += '\n'
+		}
+
 		// construct passages object
 		const passages = {
 			'north': !nHall,
@@ -192,16 +261,15 @@ export const createEdgeGraphic = (graph) => {
 		}
 
 		// get unicode glyph symbol box-drawing element.
-		result += getGlyph(passages, 'edge')
+		graphic += getGlyph(passages, 'edge')
 	}
+
 	// return maze drawing.
-	return result
+	return graphic
 }
 
-const getGlyph = (
-	passages,
-	type = 'pipe',
-) => {
+
+const getGlyph = (passages) => {
 
 	// this function returns a maze drawing character.
 	let glyph = ''
