@@ -1,6 +1,6 @@
 {
 	"name": "maze-visualizer",
-	"version": "0.1.0",
+	"version": "0.1.1",
 	"description": "Maze Visualizer tools.",
 	"keywords": [
 		"maze",
@@ -22,8 +22,8 @@
 	],
 	"type": "module",
 	"dependencies": {
-		"maze-algorithms": "^0.3.3",
-		"tessellatron": "^0.4.2"
+		"maze-algorithms": "^0.3.4",
+		"tessellatron": "^0.4.3"
 	},
 	"devDependencies": {},
 	"scripts": {
