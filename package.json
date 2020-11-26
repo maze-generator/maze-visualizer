@@ -1,6 +1,6 @@
 {
 	"name": "maze-visualizer",
-	"version": "0.0.3",
+	"version": "0.1.0",
 	"description": "Maze Visualizer tools.",
 	"keywords": [
 		"maze",
@@ -16,21 +16,18 @@
 	"bugs": {
 		"url": "https://github.com/maze-generator/maze-visualizer/issues"
 	},
-	"main": "lib/index.js",
+	"main": "src/main.js",
 	"files": [
-		"lib/**/*"
+		"src/*"
 	],
+	"type": "module",
 	"dependencies": {
-		"maze-algorithms": "^0.2.1",
-		"tessellatron": "^0.3.1"
+		"maze-algorithms": "^0.3.3",
+		"tessellatron": "^0.4.2"
 	},
-	"devDependencies": {
-		"ts-node": "^9.0.0",
-		"typescript": "^4.1.2"
-	},
+	"devDependencies": {},
 	"scripts": {
 		"test": "echo \"Error: no test specified\" && exit 1",
-		"start": "ts-node src/index.ts",
-		"build": "tsc"
+		"start": "node src/main.js"
 	}
 }
