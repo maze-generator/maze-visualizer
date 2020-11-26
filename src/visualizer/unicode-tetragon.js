@@ -1,22 +1,31 @@
-// a pipe-maze is much more simple to make.
-// a player must follow lines to complete the maze.
-// while less traditional, it is very easy to make.
-// each vertex determinse a unicode character.
-export const createPipeGraphic = (graph) => {
-	// initialize result string with linebreak.
+/* EDGED TEXT GRAPHIC FUNCTION */
+// Conceptually, an edge maze is much more simple to make.
+// However it is not the conventional maze style.
+// Players must follow edge-lines to complete the maze.
+// This is opposed to a traditional pipe-style maze.
+//
+// While less traditional, it has an easier function.
+// Each "vertex", or space on the maze,
+// 	is represented by one single unicode character.
+
+export const createEdgedTextGraphic = (graph) => {
+	// Our return value is going to be a multi-line string.
+	// Here we'll initialize the graphic with a linebreak.
 	let graphic = '\n'
 
-	// loop through maze.
+	// Loop through each cell of the maze or graph.
 	for (const [id, cell] of graph.data.entries()) {
-		const passages = cell.passages
-		graphic += getGlyph(passages)
+		// Get the symbol that represents this cell, and add it.
+		graphic += getGlyph(cell.passages)
 
-		// add line break if end of line is reached
-		if (graph.findCoordinates(id)[0] === graph.dimensions[0]-1) {
+		// If the end of the row is reached, add a new visual row.
+		if (graph.findCoordinates(id)[0] === graph.dimensions[0] - 1) {
+			// We can add a new row with a new linebreak.
 			graphic += '\n'
 		}
 	}
 
+	// That's it!
 	return graphic
 }
 
