@@ -1,5 +1,3 @@
-import Maze from 'maze-algorithms'
-
 import {
 	createPipedTextGraphic,
 	createEdgedTextGraphic,
