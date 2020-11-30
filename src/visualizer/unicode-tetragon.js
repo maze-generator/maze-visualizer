@@ -52,7 +52,7 @@ export const createEdgedTextGraphic = (graph) => {
 //   ╵ ╵
 // ^^^^^^^ it has empty spaces!
 // It looks like the birds-eye view of an intersection.
-// Figuring out the symbol for the corners is difficult.
+// Figuring out the symbols of the 4 corners is difficult.
 
 export const createPipedTextGraphic = (graph) => {
 	// Our return value is going to be a multi-line string.
@@ -74,6 +74,7 @@ export const createPipedTextGraphic = (graph) => {
 
 	// We'll first determine the "padding" for the edges.
 	// the padding helps analyze corners and boundaries.
+	// One cell extra for the left, and one cell extra for the right.
 	// Remember; the graph is 2D (length, height).
 	const [length, height] = graph.dimensions
 	const paddedLength = length + 2
@@ -116,34 +117,48 @@ export const createPipedTextGraphic = (graph) => {
 
 
 	// This thing calculates the graphics.
-	// We'll iterate every length item, plus length for nulls.
+	// We'll iterate every length item, plus an extra length for nulls.
 	for (
-		let location = 0; // initializer
-		location < graphicLength * graphicHeight + length; // while clause
-		location++ // iterator
+		let iterLocation = 0; // initializer
+		iterLocation < graphicLength * (graphicHeight); // while clause
+		iterLocation++ // iterator
 	) {
+		// save this value for later.
+		let location = iterLocation
+
 		// Determine graphic symbol's row and column.
 		// There are no void graphic locations.
 		const row = Math.floor(location / graphicLength)
 		const column = location % (graphicLength + 1)
 
+		// its "later", now :)
+		// in order to get the proper index, we must add the row.
+		// this "skips" null lines, or void cells that act like
+		// the `\n` character or newlines.
+		//
+		// its weird but it works if you think about it.
+		// so it would go location 1 2 3, 5 6 7, 9 10 11... etc
+		// we need to skip because there's an extra spot for the graphic.
+		location += row
+
 		// Determine nearby IDs of nodes in the paddedMaze.
 		// These are not ACTUAL cells. They are "padded".
 		// This means, it includes edge-nodes or void cells.
 		// Non-void cells reference an actual graph cell!
-		const nwCellID = paddedMaze[location]
-		const neCellID = paddedMaze[location + 1]
-		const swCellID = paddedMaze[location + paddedLength]
-		const seCellID = paddedMaze[location + paddedLength + 1]
+		const nwCellID = paddedMaze[location] ?? null
+		const neCellID = paddedMaze[location + 1] ?? null
+		const swCellID = paddedMaze[location + paddedLength] ?? null
+		const seCellID = paddedMaze[location + paddedLength + 1] ?? null
 
-		// Ignore void situations (between two lines)
-		if ( nwCellID === null
-			&& neCellID === null
-			&& swCellID === null
-			&& seCellID === null
-		) {
-			continue
-		}
+		/*// Ignore void situations (between two lines)
+		// if ( nwCellID === null
+		// 	&& neCellID === null
+		// 	&& swCellID === null
+		// 	&& seCellID === null
+		// ) {
+		// 	console.log()
+		// 	continue
+		// }*/
 
 		// Initialize hallway passageways as booleans.
 		// If there is a passway, then its true, else false.
