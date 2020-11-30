@@ -1,6 +1,6 @@
 {
 	"name": "maze-visualizer",
-	"version": "0.1.2",
+	"version": "0.1.3",
 	"description": "Maze Visualizer tools.",
 	"keywords": [
 		"maze",
@@ -22,10 +22,11 @@
 	],
 	"type": "module",
 	"dependencies": {
-		"maze-algorithms": "~0.3.6",
 		"tessellatron": "~0.5.0"
 	},
-	"devDependencies": {},
+	"devDependencies": {
+		"maze-algorithms": "~0.3.7"
+	},
 	"scripts": {
 		"test": "echo \"Error: no test specified\" && exit 1",
 		"start": "node src/main.js"
