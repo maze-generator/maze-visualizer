@@ -25,6 +25,10 @@ export const createEdgedTextGraphic = (graph) => {
 		}
 	}
 
+	// clean white-space.
+	graphic = graphic.replace(/\s\n/g, '\n')
+	graphic = graphic.trim()
+
 	// That's it!
 	return graphic
 }
@@ -278,6 +282,10 @@ export const createPipedTextGraphic = (graph) => {
 		// get unicode glyph symbol box-drawing element.
 		graphic += getGlyph(passages, 'edge')
 	}
+
+	// clean white-space.
+	graphic = graphic.replace(/\s\n/g, '\n')
+	graphic = graphic.trim()
 
 	// return maze drawing.
 	return graphic
