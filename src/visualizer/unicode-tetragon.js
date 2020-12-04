@@ -27,7 +27,7 @@ export const createEdgedTextGraphic = (graph) => {
 
 	// clean white-space.
 	graphic = graphic.replace(/\s\n/g, '\n')
-	graphic = graphic.trimEnd()
+	graphic = graphic.replace(/(^\n|\n$)/g, '')
 
 	// That's it!
 	return graphic
@@ -285,7 +285,7 @@ export const createPipedTextGraphic = (graph) => {
 
 	// clean white-space.
 	graphic = graphic.replace(/\s\n/g, '\n')
-	graphic = graphic.trimEnd()
+	graphic = graphic.trim()
 
 	// return maze drawing.
 	return graphic
